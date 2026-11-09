@@ -42,3 +42,44 @@ def evaluate(temperature_c, humidity_pct):
     simulacion.input["humedad"] = float(humidity_pct)
     simulacion.compute()
     return float(simulacion.output["velocidad"])
+
+REGLAS = [
+    ("fria", "baja", "baja"), ("fria", "media", "baja"),
+    ("fria", "alta", "media"), ("templada", "baja", "baja"),
+    ("templada", "media", "media"), ("templada", "alta", "alta"),
+    ("caliente", "baja", "alta"), ("caliente", "media", "alta"),
+    ("caliente", "alta", "alta"),
+]
+
+def explain(temperature_c, humidity_pct):
+    """Devuelve pertenencias, reglas activas y conjunto agregado para visualizar."""
+    resultado = evaluate(temperature_c, humidity_pct)
+    _, (temperatura, humedad, velocidad) = build_system()
+    pertenencia_t = {
+        nombre: float(fuzz.interp_membership(temperatura.universe, termino.mf, temperature_c))
+        for nombre, termino in temperatura.terms.items()
+    }
+    pertenencia_h = {
+        nombre: float(fuzz.interp_membership(humedad.universe, termino.mf, humidity_pct))
+        for nombre, termino in humedad.terms.items()
+    }
+    activas = []
+    agregada = np.zeros_like(velocidad.universe)
+    for nombre_t, nombre_h, nombre_v in REGLAS:
+        fuerza = min(pertenencia_t[nombre_t], pertenencia_h[nombre_h])
+        if fuerza > 1e-10:
+            activas.append({
+                "temperatura": nombre_t,
+                "humedad": nombre_h,
+                "velocidad": nombre_v,
+                "activacion": fuerza,
+            })
+            agregada = np.fmax(agregada, np.fmin(fuerza, velocidad[nombre_v].mf))
+    return {
+        "velocidad": resultado,
+        "temperatura": pertenencia_t,
+        "humedad": pertenencia_h,
+        "reglas": activas,
+        "universo": velocidad.universe,
+        "agregada": agregada,
+    }

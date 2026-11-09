@@ -15,3 +15,18 @@ def test_cambio_humedad():
 def test_entradas_invalidas(t, h):
     with pytest.raises(ValueError):
         evaluate(t, h)
+
+from src.controller import explain
+
+def test_reglas_activas():
+    detalle = explain(25, 60)
+    assert detalle["reglas"]
+    assert all(0 < r["activacion"] <= 1 for r in detalle["reglas"])
+    assert 0 <= detalle["velocidad"] <= 100
+
+def test_agregacion_no_vacia():
+    detalle = explain(35, 85)
+    assert detalle["agregada"].max() > 0
+
+def test_explicacion_coincide_con_controlador():
+    assert explain(25, 60)["velocidad"] == pytest.approx(evaluate(25, 60))
