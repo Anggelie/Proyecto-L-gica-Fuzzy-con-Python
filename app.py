@@ -4,6 +4,11 @@ import streamlit as st
 from src.controller import build_system, evaluate
 
 st.set_page_config(page_title="Ventilación difusa", page_icon="🌡️", layout="wide")
+st.markdown("""
+<style>
+[data-testid="stToolbar"], [data-testid="stMainMenu"] {display: none !important;}
+</style>
+""", unsafe_allow_html=True)
 st.title("Control inteligente de ventilación")
 st.write("Simulación de un controlador Mamdani con temperatura y humedad.")
 a, b = st.columns(2)
