@@ -15,6 +15,20 @@ st.markdown("""
 [data-testid="stMainMenuPopover"],
 [data-testid="stAppDeployButton"],
 #MainMenu {display: none !important;}
+[data-testid="stMainBlockContainer"] {
+    max-width: 1000px;
+}
+[data-testid="stImage"] {
+    max-width: 740px;
+    margin-left: auto;
+    margin-right: auto;
+}
+@media (max-width: 640px) {
+    [data-testid="stMainBlockContainer"] {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 st.title("Control inteligente de ventilación", anchor=False)
@@ -30,7 +44,6 @@ detalle = explain(temperatura, humedad)
 salida = detalle["velocidad"]
 st.metric("Velocidad recomendada del ventilador", f"{salida:.1f} %")
 st.progress(int(round(salida)))
-st.caption("Simulación académica: no controla un ventilador real.")
 
 st.subheader("1. Pertenencia de las entradas", anchor=False)
 c1, c2 = st.columns(2)
@@ -64,7 +77,7 @@ else:
 
 st.subheader("3. Agregación y desfusificación", anchor=False)
 st.write("Las salidas recortadas se combinan con el máximo. El centroide determina la velocidad final.")
-fig, ax = plt.subplots(figsize=(9, 3))
+fig, ax = plt.subplots(figsize=(5.5, 3.2))
 ax.fill_between(detalle["universo"], detalle["agregada"], alpha=0.35, label="Salida agregada")
 ax.plot(detalle["universo"], detalle["agregada"])
 ax.axvline(salida, color="tab:red", linestyle="--", label=f"Centroide: {salida:.1f} %")
@@ -82,17 +95,19 @@ with st.expander("Ver las nueve reglas del controlador"):
 
 st.subheader("4. Funciones de pertenencia", anchor=False)
 _, variables = build_system()
-fig, axes = plt.subplots(1, 3, figsize=(13, 3.5))
-for ax, variable, titulo in zip(axes, variables, ["Temperatura", "Humedad", "Velocidad"]):
-    for etiqueta, termino in variable.terms.items():
-        ax.plot(variable.universe, termino.mf, label={"fria": "Fría"}.get(etiqueta, etiqueta.capitalize()))
-    ax.set_title(titulo)
-    ax.set_ylim(0, 1.05)
-    ax.legend()
-    ax.grid(alpha=0.2)
-fig.tight_layout()
-st.pyplot(fig)
-plt.close(fig)
+columnas = st.columns(3)
+for columna, variable, titulo in zip(columnas, variables, ["Temperatura", "Humedad", "Velocidad"]):
+    with columna:
+        fig, ax = plt.subplots(figsize=(4, 3.5))
+        for etiqueta, termino in variable.terms.items():
+            ax.plot(variable.universe, termino.mf, label={"fria": "Fría"}.get(etiqueta, etiqueta.capitalize()))
+        ax.set_title(titulo)
+        ax.set_ylim(0, 1.05)
+        ax.legend()
+        ax.grid(alpha=0.2)
+        fig.tight_layout()
+        st.pyplot(fig)
+        plt.close(fig)
 
 st.subheader("5. Experimentos", anchor=False)
 escenarios = [
@@ -110,16 +125,15 @@ for nombre, t, h in escenarios:
         "Velocidad calculada (%)": round(v, 2),
     })
 st.dataframe(pd.DataFrame(filas), hide_index=True, use_container_width=True)
-st.caption("Resultados calculados al ejecutar el modelo; no son mediciones de un equipo físico.")
-
 with st.expander("Mostrar superficie de control (puede tardar unos segundos)"):
     if st.button("Calcular superficie"):
         temperaturas = np.linspace(0, 40, 21)
         humedades = np.linspace(0, 100, 21)
         valores = np.array([[evaluate(float(t), float(h)) for t in temperaturas] for h in humedades])
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(5.5, 3.5))
         imagen = ax.contourf(temperaturas, humedades, valores, levels=15)
         ax.set(xlabel="Temperatura (°C)", ylabel="Humedad (%)")
         fig.colorbar(imagen, ax=ax, label="Velocidad (%)")
+        fig.tight_layout()
         st.pyplot(fig)
         plt.close(fig)
