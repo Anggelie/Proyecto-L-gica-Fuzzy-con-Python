@@ -1,0 +1,46 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,geometry,amsmath,booktabs,hyperref}
+\geometry{margin=2.5cm}
+\title{Control inteligente de ventilación mediante lógica difusa\\\large Aplicación con Python y scikit-fuzzy}
+\author{Lógica Matemática\\Integrantes: completar nombres del equipo}
+\date{Noviembre de 2026}
+\begin{document}
+\maketitle
+\section{Introducción}
+La lógica difusa permite representar conceptos graduales como temperatura alta y humedad media mediante grados de pertenencia entre cero y uno. Se propone un controlador académico que recomienda la velocidad de un ventilador según dos variables ambientales.
+\section{Problema y objetivos}
+Los controles con umbrales rígidos cambian bruscamente de estado. El objetivo es simular una alternativa gradual mediante Python y scikit-fuzzy. Las entradas son temperatura $T\in[0,40]$ grados Celsius y humedad $H\in[0,100]$ por ciento; la salida es velocidad $V\in[0,100]$ por ciento.
+\section{Modelo matemático}
+Se utiliza inferencia Mamdani. La función triangular se define por:
+\[\mu_{\mathrm{tri}}(x;a,b,c)=\max\left(\min\left(\frac{x-a}{b-a},\frac{c-x}{c-b}\right),0\right).\]
+Las funciones trapezoidales usan cuatro puntos, con ascenso lineal, meseta y descenso lineal; los extremos coincidentes forman hombros.
+\subsection{Conjuntos difusos}
+\begin{center}\begin{tabular}{lll}\toprule Variable & Etiqueta & Función\\\midrule
+Temperatura & fría & trap(0,0,12,20)\\
+Temperatura & templada & tri(15,23,31)\\
+Temperatura & caliente & trap(26,33,40,40)\\
+Humedad & baja & trap(0,0,25,45)\\
+Humedad & media & tri(30,50,70)\\
+Humedad & alta & trap(55,75,100,100)\\
+Velocidad & baja & trap(0,0,15,35)\\
+Velocidad & media & tri(25,50,75)\\
+Velocidad & alta & trap(65,85,100,100)\\\bottomrule\end{tabular}\end{center}
+\subsection{Base de reglas}
+\begin{center}\begin{tabular}{lccc}\toprule & Humedad baja & Humedad media & Humedad alta\\\midrule
+Temperatura fría & baja & baja & media\\
+Temperatura templada & baja & media & alta\\
+Temperatura caliente & alta & alta & alta\\\bottomrule\end{tabular}\end{center}
+El operador Y se calcula con el mínimo de las pertenencias. Las salidas de las reglas se agregan mediante máximo y se desfusifican por centroide:
+\[V^*=\frac{\int_0^{100}v\,\mu_{\mathrm{agregada}}(v)\,dv}{\int_0^{100}\mu_{\mathrm{agregada}}(v)\,dv}.\]
+\section{Resolución e implementación}
+El módulo \texttt{src/controller.py} define las funciones de pertenencia, nueve reglas y la función \texttt{evaluate(T,H)}. La aplicación \texttt{app.py} permite variar las entradas, visualizar las funciones y calcular una superficie de control. Se utilizan \texttt{numpy}, \texttt{scikit-fuzzy}, \texttt{matplotlib} y \texttt{streamlit}.
+\section{Validación}
+Se incluyen pruebas automatizadas de rango, tendencias ante variaciones de temperatura y humedad, y rechazo de entradas inválidas. Los resultados numéricos deben registrarse después de ejecutar el sistema; no se presentan mediciones no verificadas.
+\section{Recomendaciones y conclusiones}
+El modelo ilustra cómo transformar reglas lingüísticas en una recomendación continua. Antes de usarlo en un equipo real, se deben calibrar conjuntos y reglas con datos de confort, añadir sensores y validar límites de seguridad. Este prototipo es didáctico, no un controlador industrial certificado.
+\section{Ejecución}
+Instalar dependencias con \texttt{pip install -r requirements.txt}, iniciar la interfaz con \texttt{streamlit run app.py} y ejecutar las pruebas con \texttt{python -m pytest -q}.
+\end{document}
