@@ -17,7 +17,7 @@ st.markdown("""
 #MainMenu {display: none !important;}
 </style>
 """, unsafe_allow_html=True)
-st.title("Control inteligente de ventilación")
+st.title("Control inteligente de ventilación", anchor=False)
 st.write("Aplicación de scikit-fuzzy: inferencia Mamdani con temperatura y humedad.")
 
 a, b = st.columns(2)
@@ -32,7 +32,7 @@ st.metric("Velocidad recomendada del ventilador", f"{salida:.1f} %")
 st.progress(int(round(salida)))
 st.caption("Simulación académica: no controla un ventilador real.")
 
-st.subheader("1. Pertenencia de las entradas")
+st.subheader("1. Pertenencia de las entradas", anchor=False)
 c1, c2 = st.columns(2)
 with c1:
     st.write("Temperatura")
@@ -47,7 +47,7 @@ with c2:
         for k, v in detalle["humedad"].items()
     ]), hide_index=True, use_container_width=True)
 
-st.subheader("2. Reglas activadas")
+st.subheader("2. Reglas activadas", anchor=False)
 st.write("La fuerza de cada regla se obtiene con el mínimo de las dos pertenencias.")
 if detalle["reglas"]:
     st.dataframe(pd.DataFrame([
@@ -62,7 +62,7 @@ if detalle["reglas"]:
 else:
     st.warning("No se activaron reglas.")
 
-st.subheader("3. Agregación y desfusificación")
+st.subheader("3. Agregación y desfusificación", anchor=False)
 st.write("Las salidas recortadas se combinan con el máximo. El centroide determina la velocidad final.")
 fig, ax = plt.subplots(figsize=(9, 3))
 ax.fill_between(detalle["universo"], detalle["agregada"], alpha=0.35, label="Salida agregada")
@@ -80,7 +80,7 @@ with st.expander("Ver las nueve reglas del controlador"):
         for t, h, v in REGLAS
     ]), hide_index=True, use_container_width=True)
 
-st.subheader("4. Funciones de pertenencia")
+st.subheader("4. Funciones de pertenencia", anchor=False)
 _, variables = build_system()
 fig, axes = plt.subplots(1, 3, figsize=(13, 3.5))
 for ax, variable, titulo in zip(axes, variables, ["Temperatura", "Humedad", "Velocidad"]):
@@ -94,7 +94,7 @@ fig.tight_layout()
 st.pyplot(fig)
 plt.close(fig)
 
-st.subheader("5. Experimentos")
+st.subheader("5. Experimentos", anchor=False)
 escenarios = [
     ("Frío", 10.0, 30.0),
     ("Templado", 25.0, 60.0),
