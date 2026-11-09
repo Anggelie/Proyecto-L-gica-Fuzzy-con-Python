@@ -4,9 +4,15 @@ import streamlit as st
 from src.controller import build_system, evaluate
 
 st.set_page_config(page_title="Ventilación difusa", page_icon="🌡️", layout="wide")
+st.set_option("client.toolbarMode", "minimal")
 st.markdown("""
 <style>
-[data-testid="stToolbar"], [data-testid="stMainMenu"] {display: none !important;}
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+[data-testid="stMainMenu"],
+[data-testid="stMainMenuPopover"],
+[data-testid="stAppDeployButton"],
+#MainMenu {display: none !important;}
 </style>
 """, unsafe_allow_html=True)
 st.title("Control inteligente de ventilación")
@@ -26,14 +32,14 @@ st.table({
     "Humedad": ["Baja", "Media", "Alta", "Baja", "Media", "Alta", "Baja", "Media", "Alta"],
     "Velocidad": ["Baja", "Baja", "Media", "Baja", "Media", "Alta", "Alta", "Alta", "Alta"]
 })
-st.write("Inferencia Mamdani: mínimo para AND, máximo para agregación y centroide para desfusificación.")
+st.write("Inferencia Mamdani: mínimo para el operador Y, máximo para agregación y centroide para desfusificación.")
 
 _, variables = build_system()
 st.subheader("Funciones de pertenencia")
 fig, axes = plt.subplots(1, 3, figsize=(13, 3.5))
 for ax, variable, titulo in zip(axes, variables, ["Temperatura", "Humedad", "Velocidad"]):
     for etiqueta, termino in variable.terms.items():
-        ax.plot(variable.universe, termino.mf, label=etiqueta)
+        ax.plot(variable.universe, termino.mf, label={"fria": "Fría"}.get(etiqueta, etiqueta.capitalize()))
     ax.set_title(titulo)
     ax.set_ylim(0, 1.05)
     ax.legend()
