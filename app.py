@@ -15,6 +15,14 @@ salida = evaluate(temperatura, humedad)
 st.metric("Velocidad recomendada", f"{salida:.1f} %")
 st.progress(int(round(salida)))
 st.caption("Modelo didáctico; no controla un dispositivo real.")
+st.subheader("Reglas del controlador")
+st.table({
+    "Temperatura": ["Fría", "Fría", "Fría", "Templada", "Templada", "Templada", "Caliente", "Caliente", "Caliente"],
+    "Humedad": ["Baja", "Media", "Alta", "Baja", "Media", "Alta", "Baja", "Media", "Alta"],
+    "Velocidad": ["Baja", "Baja", "Media", "Baja", "Media", "Alta", "Alta", "Alta", "Alta"]
+})
+st.write("Inferencia Mamdani: mínimo para AND, máximo para agregación y centroide para desfusificación.")
+
 _, variables = build_system()
 st.subheader("Funciones de pertenencia")
 fig, axes = plt.subplots(1, 3, figsize=(13, 3.5))
