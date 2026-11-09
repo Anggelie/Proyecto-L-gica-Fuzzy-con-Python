@@ -19,6 +19,8 @@ streamlit run app.py
 python -m pytest -q
 ```
 
+Por defecto, pytest ejecuta las pruebas de la carpeta `tests` del proyecto principal.
+
 ## Archivos
 - `src/controller.py`: funciones de pertenencia y reglas.
 - `app.py`: simulador con gráficas.
